@@ -64,12 +64,4 @@ public class MapController {
         }
     }
 
-    @GetMapping("/")
-    public String index(HttpSession session) {
-        Boolean authenticated = (Boolean) session.getAttribute("authenticated");
-        if (authenticated != null && authenticated) {
-            return "index";
-        }
-        return "redirect:/login";
-    }
 }

@@ -4,3 +4,10 @@ target/
 .project
 .settings/
 *.iml
+
+# Node.js / npm
+node_modules/
+frontend/node/
+dist/
+build/
+*.log
