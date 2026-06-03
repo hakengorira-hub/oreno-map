@@ -29,6 +29,7 @@
     var iconSelect = document.getElementById('icon-select');
     var iconSelectPreview = document.getElementById('icon-select-preview');
     var iconModalConfirm = document.getElementById('icon-modal-confirm');
+    var searchModeSelect = document.getElementById('search-mode');
     var searchInput = document.getElementById('search-input');
     var searchButton = document.getElementById('search-button');
     var searchResults = document.getElementById('search-results');
@@ -55,12 +56,24 @@
         });
     }
 
-    function mapYolpResults(data) {
+    function convertTokyoToWgs84(lat, lon) {
+        if (typeof lat !== 'number' || typeof lon !== 'number' || Number.isNaN(lat) || Number.isNaN(lon)) {
+            return [lat, lon];
+        }
+        var dLat = -0.00010695 * lat + 0.000017464 * lon + 0.0046017;
+        var dLon = -0.000046047 * lat - 0.000083049 * lon + 0.010040;
+        return [lat + dLat, lon + dLon];
+    }
+
+    function mapYolpAddressResults(data) {
         if (!data || !data.Feature) {
             return [];
         }
         return data.Feature.map(function(feature) {
             var coords = (feature.Geometry && feature.Geometry.Coordinates) ? feature.Geometry.Coordinates.split(',') : [];
+            //var lat = coords.length > 1 ? parseFloat(coords[1]) : NaN;
+            //var lon = coords.length > 1 ? parseFloat(coords[0]) : NaN;
+            //var converted = convertTokyoToWgs84(lat, lon);
             return {
                 lat: coords.length > 1 ? coords[1] : '',
                 lon: coords.length > 1 ? coords[0] : '',
@@ -70,11 +83,41 @@
         });
     }
 
+    function mapYolpKeywordResults(data) {
+        if (!data || !data.Feature) {
+            return [];
+        }
+        return data.Feature.map(function(feature) {
+            var coords = (feature.Geometry && feature.Geometry.Coordinates) ? feature.Geometry.Coordinates.split(',') : [];
+            //var lat = coords.length > 1 ? parseFloat(coords[1]) : NaN;
+            //var lon = coords.length > 1 ? parseFloat(coords[0]) : NaN;
+            //var converted = convertTokyoToWgs84(lat, lon);
+            var title = feature.Name || (feature.Property && feature.Property.Name) || '';
+            var address = (feature.Property && feature.Property.Address) || '';
+            return {
+                lat: coords.length > 1 ? coords[1] : '',
+                lon: coords.length > 1 ? coords[0] : '',
+                display_name: title + (address ? ' — ' + address : ''),
+                raw: feature
+            };
+        });
+    }
+
+    function getSearchType() {
+        return (searchModeSelect && searchModeSelect.value) ? searchModeSelect.value : 'address';
+    }
+
+    function updateSearchPlaceholder() {
+        if (!searchInput || !searchModeSelect) return;
+        searchInput.placeholder = searchModeSelect.value === 'keyword' ? 'キーワードで検索' : '住所で検索';
+    }
+
     // 検索実行
     function performSearch(query) {
         if (!query || !searchResults) return;
         searchResults.innerHTML = '検索中...';
-        var url = '/api/search?query=' + encodeURIComponent(query);
+        var type = getSearchType();
+        var url = '/api/search?query=' + encodeURIComponent(query) + '&type=' + encodeURIComponent(type);
         fetch(url, {headers: {'Accept': 'application/json'}})
             .then(function(res){
                 if (!res.ok) {
@@ -84,7 +127,10 @@
                 }
                 return res.json();
             })
-            .then(function(data){ return mapYolpResults(data); })
+            .then(function(data){
+                var results = type === 'keyword' ? mapYolpKeywordResults(data) : mapYolpAddressResults(data);
+                return results.slice(0, type === 'keyword' ? 2 : 1);
+            })
             .then(function(results){ renderSearchResults(results); })
             .catch(function(err){
                 console.error(err);
@@ -171,6 +217,13 @@
 
     // サムネイルを描画
     renderIconModalThumbs();
+
+    if (searchModeSelect) {
+        searchModeSelect.addEventListener('change', function() {
+            updateSearchPlaceholder();
+        });
+        updateSearchPlaceholder();
+    }
 
     if (searchButton && searchInput) {
         searchButton.addEventListener('click', function(){ performSearch(searchInput.value); });

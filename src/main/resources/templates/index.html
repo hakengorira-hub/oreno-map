@@ -21,10 +21,14 @@
                 <p>地図をクリックするか、検索結果から場所を選択してピンを追加してください。</p>
             </div>
             <div id="search-bar">
-        <input id="search-input" type="text" placeholder="住所またはキーワードで検索" />
-        <button id="search-button" type="button">検索</button>
-    </div>
-    <div id="search-results"></div>
+                <select id="search-mode" aria-label="検索モード">
+                    <option value="address">住所検索</option>
+                    <option value="keyword">キーワード検索</option>
+                </select>
+                <input id="search-input" type="text" placeholder="住所またはキーワードで検索" />
+                <button id="search-button" type="button">検索</button>
+            </div>
+            <div id="search-results"></div>
     <!-- アイコン選択モーダル（非表示） -->
     <div id="icon-modal" class="icon-modal" role="dialog" aria-hidden="true">
         <div class="icon-modal-content">
