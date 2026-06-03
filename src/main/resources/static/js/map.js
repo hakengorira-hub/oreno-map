@@ -55,15 +55,41 @@
         });
     }
 
+    function mapYolpResults(data) {
+        if (!data || !data.Feature) {
+            return [];
+        }
+        return data.Feature.map(function(feature) {
+            var coords = (feature.Geometry && feature.Geometry.Coordinates) ? feature.Geometry.Coordinates.split(',') : [];
+            return {
+                lat: coords.length > 1 ? coords[1] : '',
+                lon: coords.length > 1 ? coords[0] : '',
+                display_name: feature.Name || (feature.Property && feature.Property.Address) || '',
+                raw: feature
+            };
+        });
+    }
+
     // 検索実行
     function performSearch(query) {
         if (!query || !searchResults) return;
         searchResults.innerHTML = '検索中...';
-        var url = 'https://nominatim.openstreetmap.org/search?format=json&limit=6&q=' + encodeURIComponent(query);
+        var url = '/api/search?query=' + encodeURIComponent(query);
         fetch(url, {headers: {'Accept': 'application/json'}})
-            .then(function(res){ return res.json(); })
-            .then(function(data){ renderSearchResults(data); })
-            .catch(function(err){ console.error(err); searchResults.innerHTML = '検索に失敗しました'; });
+            .then(function(res){
+                if (!res.ok) {
+                    return res.text().then(function(text) {
+                        throw new Error('検索失敗: ' + res.status + ' ' + text);
+                    });
+                }
+                return res.json();
+            })
+            .then(function(data){ return mapYolpResults(data); })
+            .then(function(results){ renderSearchResults(results); })
+            .catch(function(err){
+                console.error(err);
+                searchResults.innerHTML = '検索に失敗しました';
+            });
     }
 
     function renderSearchResults(results) {
