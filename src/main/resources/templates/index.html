@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>YOLP Map Demo</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+    <link rel="stylesheet" href="/css/styles.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+</head>
+<body>
+    <div class="app-shell">
+        <header class="page-header">
+            <div>
+                <h1>俺の地図</h1>
+                <p class="subtitle">住所検索とアイコン選択でピンを自由に追加できます。</p>
+            </div>
+            <a class="logout-link" href="/logout">ログアウト</a>
+        </header>
+        <main class="content-card">
+            <div class="info-panel">
+                <p>地図をクリックするか、検索結果から場所を選択してピンを追加してください。</p>
+            </div>
+            <div id="search-bar">
+        <input id="search-input" type="text" placeholder="住所またはキーワードで検索" />
+        <button id="search-button" type="button">検索</button>
+    </div>
+    <div id="search-results"></div>
+    <!-- アイコン選択モーダル（非表示） -->
+    <div id="icon-modal" class="icon-modal" role="dialog" aria-hidden="true">
+        <div class="icon-modal-content">
+            <h3>アイコンを選択</h3>
+            <div>
+                <label for="place-name-input">場所名（任意）</label>
+                <input id="place-name-input" class="place-name-input" type="text" placeholder="例: お気に入りのカフェ" />
+            </div>
+            <div class="modal-row">
+                <label for="icon-select">アイコンを選択（プルダウン）</label>
+                <div class="select-row">
+                    <select id="icon-select"></select>
+                    <img id="icon-select-preview" src="/images/marker-circle.svg" alt="選択中アイコン" />
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button id="icon-modal-cancel" type="button">キャンセル</button>
+                <button id="icon-modal-confirm" type="button">選択して追加</button>
+            </div>
+        </div>
+    </div>
+    <div id="map"></div>
+        </main>
+    </div>
+    <script src="/js/map.js"></script>
