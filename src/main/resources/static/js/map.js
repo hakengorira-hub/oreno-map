@@ -110,6 +110,7 @@
             btn.style = 'margin-left:12px;';
             btn.addEventListener('click', function(){
                 var latlng = L.latLng(parseFloat(r.lat), parseFloat(r.lon));
+                map.flyTo(latlng, map.getZoom(), { duration: 0.7 });
                 // 事前に場所名をセットしてモーダルを開く
                 if (typeof placeNameInput !== 'undefined' && placeNameInput) {
                     placeNameInput.value = title;
